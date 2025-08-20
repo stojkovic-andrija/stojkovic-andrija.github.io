@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Discoveri - Discover yourself in 365 days</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;600;700&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"></script>
+  <script>
+    (function(){
+      function _reflectStub(){ console.warn('reflectNow stub: real impl not bound yet'); }
+      function _randomStub(){ console.warn('randomPrompt stub: real impl not bound yet'); }
+      if(typeof window.reflectNow !== 'function'){ window.reflectNow = _reflectStub; }
+      if(typeof window.randomPrompt !== 'function'){ window.randomPrompt = _randomStub; }
+      window._reflectStub = _reflectStub;
+      window._randomStub  = _randomStub;
+    })();
+  </script>
+  <style>
+    :root{
+      --ink:#0b1324; --ink-2:#435a77; --ink-3:#6b8099; --ink-invert:#f8fbff;
+      --brand:#6b64f8; --teal:#10bfa6; --sky:#34bff5; --sun:#f59e0b; --rose:#ef476f; --line:rgba(4,18,38,.12);
+      --gold-1:#f9e39a; --gold-2:#fbcf5a; --gold-3:#f6b73c;
+      /* Stronger page gradient using logo palette */
+      --bg-vert: linear-gradient(180deg,#eaf6ff 0%, #eeeaff 40%, #ffffff 85%);
+      --bg-blobs: radial-gradient(900px 600px at 10% -10%, rgba(52,191,245,.28), transparent 65%),
+                  radial-gradient(900px 600px at 95% 0%, rgba(167,243,208,.24), transparent 62%),
+                  radial-gradient(800px 540px at 60% 110%, rgba(107,100,248,.20), transparent 70%);
+      --card-grad: linear-gradient(180deg,#ffffff,#f8fbff);
+      --radius:22px; --shadow:0 10px 30px rgba(4,18,38,.08); --ring:0 0 0 4px rgba(107,100,248,.18)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg-vert),var(--bg-blobs);background-attachment:fixed;color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+    a{color:var(--brand)}
+    .container{max-width:1100px;margin:0 auto;padding:28px}
+
+    header{position:sticky;top:0;background:rgba(255,255,255,.78);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);z-index:40}
+    .nav{display:flex;gap:18px;align-items:center;justify-content:space-between}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{width:48px;height:48px;border-radius:14px;object-fit:contain;background:conic-gradient(from 180deg at 50% 50%, #a7f3d0, #38bdf8, #c7d2fe, #a7f3d0)}
+    .brand h1{font-family:'Atkinson Hyperlegible',system-ui,sans-serif;font-weight:800;font-size:1.05rem;margin:0;letter-spacing:.2px}
+
+    .btn{display:inline-flex;align-items:center;gap:.55rem;padding:.9rem 1.1rem;border-radius:14px;border:1px solid var(--line);background:#fff;color:#0b1324;font-weight:800;cursor:pointer;transition:.25s all;box-shadow:var(--shadow)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 18px 40px rgba(4,18,38,.12)}
+    .btn:focus{outline:none;box-shadow:var(--shadow),var(--ring)}
+    .btn.brand{background:linear-gradient(135deg,#a78bfa,#34bff5);color:#06131f;border-color:transparent}
+    .btn.sun{background:linear-gradient(135deg,#fde047,var(--sun));color:#1b1907;border-color:transparent}
+    .btn.ghost{background:transparent}
+    .btn.select{appearance:none;background:#fff url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%236b64f8" viewBox="0 0 16 16"><path d="M4 6l4 4 4-4z"/></svg>') no-repeat right .8rem center/16px}
+    .input{padding:.9rem 1rem;border-radius:14px;border:1px solid var(--line);background:#fff;box-shadow:var(--shadow);font-weight:700;width:100%}
+
+    .section{padding:44px 0}
+    h2{font-family:'Atkinson Hyperlegible',system-ui,sans-serif;font-size:2.4rem;line-height:1.16;margin:1rem 0 .4rem}
+    h3{margin:0 0 14px;font-size:1.55rem;font-family:'Atkinson Hyperlegible'}
+    h4{margin:0 0 10px;font-size:1.14rem;font-family:'Atkinson Hyperlegible'}
+    .small{font-size:1rem;color:var(--ink-2);line-height:1.7}
+    .lead{display:block;font-size:1.2rem;font-weight:800;color:#243245;margin-bottom:.35rem}
+
+    .card{background:var(--card-grad);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px}
+    .grid{display:grid;gap:20px}
+    .center{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+    .pair{display:grid;gap:18px;grid-template-columns:1fr 1fr}
+    @media (max-width:900px){.pair{grid-template-columns:1fr}}
+
+    .bubbles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    @media (max-width:900px){.bubbles{grid-template-columns:1fr}}
+    .bubble{position:relative;border-radius:18px;padding:18px;border:1px solid var(--line);box-shadow:var(--shadow);color:#0f172a}
+    .bubble .label{font-weight:900}
+    .bubble .num{font-size:1.6rem;font-weight:900;margin-top:6px}
+    .bubble.tam{background:linear-gradient(135deg,#dcfce7,#ffffff)}
+    .bubble.sam{background:linear-gradient(135deg,#dbeafe,#ffffff)}
+    .bubble.som{background:linear-gradient(135deg,#fff7ed,#ffffff);outline:4px solid rgba(245,158,11,.25)}
+
+    .plansTop{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media (max-width:900px){.plansTop{grid-template-columns:1fr}}
+    .plan{position:relative;overflow:hidden}
+    .plan .price{font-size:2.1rem;font-weight:900;margin:.3rem 0}
+    .ribbon{position:absolute;top:12px;right:-44px;transform:rotate(45deg);padding:.35rem 2.4rem;font-weight:900;background:linear-gradient(135deg,#a78bfa,#34bff5);color:#04121d;box-shadow:0 10px 24px rgba(4,18,38,.15)}
+    .note-under{margin-top:4px;font-size:.95rem;color:#31465f;font-weight:800}
+    .tier-free{background:linear-gradient(180deg,#ffffff,#f8fbff)}
+    .tier-monthly{background:linear-gradient(180deg,#f7fbff,#ffffff)}
+    .tier-yearly{background:linear-gradient(180deg,#fff7ed,#ffffff)}
+    .tier-pro{background:linear-gradient(180deg,var(--gold-1), var(--gold-2) 40%, var(--gold-3)); color:#3b2b04}
+    .tier-pro ul li{color:#3b2b04}
+
+    .streakBox{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px}
+    .areas{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}
+    @media (max-width:900px){.areas{grid-template-columns:1fr 1fr}}
+    .areaBadge{border:1px solid var(--line);border-radius:16px;padding:12px;color:#0f172a;background:linear-gradient(180deg,#f9fafb,#ffffff)}
+    .areaBadge.locked{opacity:.6}
+    .areaBadge .title{display:flex;align-items:center;gap:8px;font-weight:900}
+    .g-focus{background:linear-gradient(180deg,#e6fbf6,#ffffff)}
+    .g-connection{background:linear-gradient(180deg,#ffe7ee,#ffffff)}
+    .g-movement{background:linear-gradient(180deg,#e9f6ff,#ffffff)}
+    .g-learning{background:linear-gradient(180deg,#efeaff,#ffffff)}
+    .g-creativity{background:linear-gradient(180deg,#ffeaf6,#ffffff)}
+    .g-mindfulness{background:linear-gradient(180deg,#eafdfd,#ffffff)}
+    .g-resilience{background:linear-gradient(180deg,#eaf8ee,#ffffff)}
+    .g-purpose{background:linear-gradient(180deg,#f4eaff,#ffffff)}
+    .g-gratitude{background:linear-gradient(180deg,#fff4e5,#ffffff)}
+    .g-play{background:linear-gradient(180deg,#eaf2ff,#ffffff)}
+    .g-finances{background:linear-gradient(180deg,#edf7ff,#ffffff)}
+    .g-sleep{background:linear-gradient(180deg,#eef2ff,#ffffff)}
+
+    .timeline{position:relative;margin:10px 0}
+    .timeline:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;background:linear-gradient(180deg,#a78bfa,#34bff5);transform:translateX(-50%)}
+    .event{position:relative;width:100%;margin:16px 0}
+    .event .card{width:calc(50% - 18px)}
+    .event.left .card{margin-right:auto}
+    .event.right .card{margin-left:auto}
+    .event .dot{position:absolute;left:50%;top:22px;transform:translate(-50%,-50%);width:16px;height:16px;border-radius:50%;background:#6b64f8;box-shadow:0 0 0 4px rgba(107,100,248,.25)}
+    @media (max-width:900px){.event .card{width:calc(100% - 18px)}}
+
+    .comp{display:grid;grid-template-columns:1fr;gap:18px}
+    .comp .c{border:1px solid var(--line);border-radius:16px;background:#fff;padding:18px}
+    .app-img{width:44px;height:44px;border-radius:10px}
+
+    .krow{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+    @media (max-width:900px){.krow{grid-template-columns:1fr}}
+    .kcard{border:1px solid var(--line);border-radius:14px;background:#fff;padding:12px;font-weight:900}
+
+    /* Chart sizing guard to stop infinite growth */
+    .chartFrame{position:relative;height:240px;overflow:hidden}
+    .chartFrame canvas{display:block;width:100% !important;height:100% !important}
+
+    canvas{background:#fff;border:1px solid var(--line);border-radius:14px}
+  </style>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 16.2 5.3 12l1.4-1.4 2.8 2.8 7.8-7.8 1.4 1.4z"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 9.8 8.2 4 10l5.8 1.8L12 18l2.2-6.2L20 10l-5.8-1.8z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="m12 2 3 6 6 .9-4.5 4.4 1 6L12 16l-5.5 3.3 1-6L3 8.9 9 8z"/></symbol>
+    <symbol id="i-crown" viewBox="0 0 24 24"><path fill="currentColor" d="M3 7 7 12l5-6 5 6 4-5v10H3z"/></symbol>
+    <symbol id="i-badge" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2 15 8l6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 3a7 7 0 1 1 0 14 7 7 0 0 1 0-14zm0 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21s-7-4.35-9-8.35C1.5 9.5 3.5 6 7 6c2 0 3 .95 5 3 2-2.05 3-3 5-3 3.5 0 5.5 3.5 4 6.65C19 16.65 12 21 12 21z"/></symbol>
+    <symbol id="i-run" viewBox="0 0 24 24"><path fill="currentColor" d="M13 5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zm-1 5 2 1 3 1-1 2-2-.5-1 3-3 5h-2l2-6-3-1 1-2 2 .5 2-3z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path fill="currentColor" d="M4 3h12a3 3 0 0 1 3 3v13a1 1 0 0 1-1 1H7a3 3 0 0 0-3 3V4a1 1 0 0 1 1-1z"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path fill="currentColor" d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm-5-3a5 5 0 0 0 10 0h2a7 7 0 0 1-6 6.92V20h3v2H8v-2h3v-2.08A7 7 0 0 1 5 11h2z"/></symbol>
+    <symbol id="i-coin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 5v2h1a1 1 0 110 2h-1v2h2a1 1 0 110 2h-2v2h-2v-2H9a1 1 0 110-2h2v-2H9a1 1 0 110-2h2V7h2z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path fill="currentColor" d="M21 12.5A9 9 0 1111.5 3a7 7 0 109.5 9.5z"/></symbol>
+  </svg>
+
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <div class="logo" role="img" aria-label="Discoveri logo"></div>
+        <h1>Discoveri - Discover yourself in 365 days</h1>
+      </div>
+      <div class="center">
+        <button class="btn ghost" onclick="document.querySelector('#downloads').scrollIntoView({behavior:'smooth'})">Downloads</button>
+        <button class="btn brand" onclick="openModal()">I'm Interested</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="section" id="intro">
+      <div class="card">
+        <div class="small" style="font-weight:900;text-transform:uppercase;letter-spacing:.08em;color:#31465f">Self‑discovery • AI‑guided</div>
+        <h3><span class="lead">One honest prompt a day.</span> In a year, a clearer story of who you are. <div>
+Private by default, designed for meaning over metrics.</h3>
+        <div class="center"><button class="btn brand" onclick="document.querySelector('#promptDemo').scrollIntoView({behavior:'smooth'})">Try the Daily Prompt</button></div>
+      </div>
+    </section>
+
+    <section class="section" id="promptDemo">
+      <div class="card" id="simCard">
+        <h3>Daily Prompt — Simulator</h3>
+        <p class="small">Choose an option or write a sentence. If you select a choice and reflect, we’ll show a brief analysis of your <b>tendency</b> — we <b>discover</b> patterns and tailor follow‑ups, not reinforce habits blindly.</p>
+        <div class="grid">
+          <div>
+            <label class="small">Prompt</label>
+            <div class="card" style="padding:16px;margin-top:6px">
+              <div id="promptText" class="small" style="color:#0f172a">Loading…</div>
+              <div id="choices" style="display:grid;gap:10px;margin-top:12px"></div>
+            </div>
+            <label class="small" style="margin-top:12px;display:block">Or write your own (kept on‑device)</label>
+            <textarea id="userAnswer" class="input" style="height:120px;resize:vertical" placeholder="One or two sentences…"></textarea>
+            <div class="center" style="margin-top:14px">
+              <button class="btn brand" onclick="reflectNow()">Reflect</button>
+              <button class="btn" onclick="randomPrompt()">New sample prompt</button>
+            </div>
+            <div id="followUp" class="card" style="padding:16px;margin-top:14px;min-height:90px"><span class="small" style="color:#475569">Your follow‑up will appear here.</span></div>
+            <div id="analysis" class="card" style="padding:14px;margin-top:10px;display:none;background:linear-gradient(180deg,#f3f6ff,#0)"><h4 style="margin-bottom:6px">Quick analysis</h4><div class="small" id="analysisText"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" id="streaks" style="margin-top:16px">
+        <h4>Streak & Area Achievements</h4>
+        <div class="streakBox">
+          <div class="small"><b>Days reflected:</b> <span id="streakNum">0</span></div>
+          <button class="btn" onclick="resetStreaks()">Reset (demo)</button>
+        </div>
+        <div class="areas" id="areasWrap"></div>
+        <div class="card" style="margin-top:12px">
+          <h4 style="margin-bottom:6px">Personality review</h4>
+          <div class="small" id="personaOut">Unlock areas (31 days total, then every +30) to preview insights.</div>
+          <div class="small" id="understandingOut" style="margin-top:6px"><b>Overall understanding:</b> 0%</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="atAGlance">
+      <div class="card">
+        <h3>At a glance</h3>
+        <p class="small">Discoveri is a calm companion for a year of self‑discovery. One meaningful question a day; threaded follow‑ups; narrative summaries every 90 days. Everything is yours to keep, private by default, with one‑tap export or delete. Streaks are gentle and pauseable; progress is recognized across <b>Focus</b>, <b>Connection</b>, <b>Movement</b>, and <b>Learning</b>.</p>
+      </div>
+    </section>
+
+    <section class="section" id="featurePlan">
+      <div class="pair">
+        <div class="card">
+          <h3>Feature plan</h3>
+          <ul class="small" style="line-height:1.9">
+            <li><b>Adaptive prompts</b> — context‑aware callbacks to prior answers.</li>
+            <li><b>Threaded reflections</b> — back‑and‑forth dialog that compounds.</li>
+            <li><b>Privacy‑first</b> — local by default; one‑tap export & delete.</li>
+            <li><b>Gentle streaks</b> — pause/backfill without harsh penalties.</li>
+            <li><b>Values map</b> — cross‑entry insights & weekly highlights.</li>
+            <li><b>Trimester reports</b> — narrative recaps every ~90 days.</li>
+          </ul>
+        </div>
+        <div class="card" style="background:linear-gradient(180deg,#fff7ed,#ffffff)">
+          <h3><svg style="width:18px;height:18px;vertical-align:-3px"><use href="#i-crown"/></svg> Pro (premium)</h3>
+          <ul class="small" style="line-height:1.9">
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-spark"/></svg> <b>Deep Insights+</b> — higher‑context model, longer threads.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-mic"/></svg> <b>Audio prompts</b> — serene voice & soundscapes.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-check"/></svg> <b>Guided routines</b> — short, optional micro‑exercises.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-star"/></svg> <b>Theme packs</b> — monthly libraries & creator packs.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-badge"/></svg> <b>Mood overlays</b> — optional trend layer over insights.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-target"/></svg> <b>Goals view</b> — turn reflections into gentle goals.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-book"/></svg> <b>Knowledge threads</b> — connect ideas across months.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-heart"/></svg> <b>Relationship prompts</b> — paired reflections.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-run"/></svg> <b>Energy rituals</b> — movement micro‑breaks.</li>
+            <li><svg style="width:16px;height:16px;vertical-align:-3px"><use href="#i-coin"/></svg> <b>Supporter badge</b> — early labs & priority roadmap.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="market">
+      <h3>Market Size</h3>
+      <div class="bubbles">
+        <div class="bubble tam"><div class="label">TAM (2028 est.)</div><div class="num" id="tamNum">$68.0B</div><div class="small">Self‑improvement & wellness apps</div></div>
+        <div class="bubble sam"><div class="label">SAM</div><div class="num" id="samNum">$6.0B</div><div class="small">Guided journaling & reflection</div></div>
+        <div class="bubble som"><div class="label">SOM (Year 1–3)</div><div class="num" id="somNum">$120M</div><div class="small">EN‑first mobile at $3–$10/mo</div></div>
+      </div>
+    </section>
+
+    <section class="section" id="pricing">
+      <h3 style="text-align:center">Simple pricing for a year‑long journey</h3>
+      <div class="plansTop">
+        <div class="card plan tier-free"><h4>Free</h4><p class="small">Start reflecting, risk‑free.</p><div class="price">$0</div><ul class="small"><li>Daily prompt</li><li>Archive</li><li>Pauseable streaks</li><li>Privacy center</li><li>90‑day summary preview</li></ul><div class="center"><button class="btn" onclick="openModal()">Try Free</button></div></div>
+        <div class="card plan tier-yearly"><span class="ribbon">POPULAR</span><h4>Yearly</h4><p class="small">Best value for the full 365‑day arc.</p><div class="price">$29.99</div><div class="note-under">~38% off vs monthly</div><ul class="small"><li>Everything in Free</li><li>Threaded reflections</li><li>Trimester reports</li><li>Cross‑entry insights & values map</li><li>Advanced search & sync</li></ul><div class="center"><button class="btn sun" onclick="openModal('Yearly')">Start your 365 Discoveri</button></div></div>
+        <div class="card plan tier-monthly"><h4>Monthly</h4><p class="small">Flexible month‑to‑month.</p><div class="price">$3.99</div><ul class="small"><li>Everything in Free</li><li>Threaded reflections</li><li>Trimester reports</li><li>Insights & values map</li></ul><div class="center"><button class="btn" onclick="openModal('Monthly')">Subscribe Monthly</button></div></div>
+      </div>
+      <div class="center" style="margin-top:16px">
+        <div class="card plan tier-pro" style="max-width:720px;width:90%"><h4><svg class="icon" style="vertical-align:-3px;width:18px;height:18px"><use href="#i-crown"/></svg> Pro</h4><p class="small">Longer threads, higher‑context insights, premium content.</p><div class="price">$9.99</div><ul class="small"><li>Better model & memory</li><li>Guided routines & audio prompts</li><li>Deeper values map + mood overlays</li><li>Priority features & theme packs</li><li>Goals view & knowledge threads</li><li>Relationship prompts & energy rituals</li><li>Early labs access & supporter badge</li></ul><div class="center" style="margin-top:10px"><button class="btn" onclick="openModal('Pro')">Go Pro</button></div></div>
+      </div>
+    </section>
+
+    <section class="section" id="projections">
+      <div class="card">
+        <h3>Pricing projection</h3>
+        <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+          <div><label class="small">MAU</label><input class="input" type="number" id="ppMAU" value="10000" min="1"></div>
+          <div><label class="small">Conversion (fraction 0–1)</label><input class="input" type="number" id="ppConv" value="0.12" step="0.001" min="0" max="1"></div>
+          <div><label class="small">Mix: Y / M / P</label><div style="display:flex;gap:8px"><input class="input" type="number" id="mixY" value="0.6" step="0.01" min="0" max="1"><input class="input" type="number" id="mixM" value="0.35" step="0.01" min="0" max="1"><input class="input" type="number" id="mixP" value="0.05" step="0.01" min="0" max="1"></div></div>
+        </div>
+        <div class="krow">
+          <div class="kcard">Net revenue<br><span id="prNet">$—</span></div>
+          <div class="kcard">Costs<br><span id="prCost">$—</span></div>
+          <div class="kcard">Profit after tax<br><span id="prProfit">$—</span></div>
+        </div>
+        <div class="chartFrame"><canvas id="projChart"></canvas></div>
+        <div class="small" id="projSummary" style="margin-top:6px"></div>
+      </div>
+    </section>
+
+    <section class="section" id="competitors">
+      <h3>Competitors → How we solve pain points</h3>
+      <div class="comp" id="compWrap"></div>
+      <div class="card" style="margin-top:12px"><b>Total potential users acquired (approx):</b> <span id="compTotal">—</span></div>
+    </section>
+
+    <section class="section" id="calculator">
+      <div class="card">
+        <h3>Unit Economics — Interactive</h3>
+        <div class="grid" style="grid-template-columns:repeat(4,1fr)">
+          <div><label class="small">MAU</label><input class="input" type="number" id="inpMAU" value="10000" min="1"></div>
+          <div><label class="small">Conversion (fraction 0–1)</label><input class="input" type="number" id="inpConv" value="0.05" min="0" max="1" step="0.001"></div>
+          <div><label class="small">Monthly Price ($)</label><input class="input" type="number" id="inpPrice" value="3.99" step="0.01"></div>
+          <div><label class="small">Model Strategy</label>
+            <select id="inpModel" class="btn select"><option value="mini">Mini‑only</option><option value="hybrid" selected>Recommended Hybrid</option><option value="pro">Pro</option></select>
+          </div>
+          <div><label class="small">Store Fee (weighted)</label><input class="input" type="number" id="inpStore" value="0.15" step="0.01"></div>
+          <div><label class="small">Tax on Profit</label><input class="input" type="number" id="inpTax" value="0.30" step="0.01"></div>
+          <div><label class="small">Free DAU</label><input class="input" type="number" id="inpFreeDAU" value="0.30" step="0.01"></div>
+          <div><label class="small">Paid DAU</label><input class="input" type="number" id="inpPaidDAU" value="0.60" step="0.01"></div>
+        </div>
+        <div class="krow">
+          <div class="kcard">Net Revenue<br><span id="ueNet">$—</span></div>
+          <div class="kcard">Total Costs<br><span id="ueCost">$—</span></div>
+          <div class="kcard">Profit after tax<br><span id="ueProfit">$—</span></div>
+        </div>
+        <div class="chartFrame"><canvas id="unitChart"></canvas></div>
+        <div class="small" id="unitSummary" style="margin-top:6px"></div>
+      </div>
+    </section>
+
+    <section class="section" id="timeline">
+      <div class="card">
+        <h3>Development & Go‑to‑Market Timeline (12 months)</h3>
+        <div class="timeline" id="timelineWrap"></div>
+      </div>
+    </section>
+
+    <section class="section" id="funding">
+      <div class="card">
+        <h3>Funding to profitability</h3>
+        <div class="grid" style="grid-template-columns:repeat(5,1fr);gap:12px">
+          <div><label class="small">Team burn / month ($)</label><input id="burn" class="input" type="number" value="15000"></div>
+          <div><label class="small">Marketing / month ($)</label><input id="mkt" class="input" type="number" value="3000"></div>
+          <div><label class="small">Months to breakeven</label><input id="months" class="input" type="number" value="8" min="1"></div>
+          <div><label class="small">Target MAU at breakeven</label><input id="targetMAU" class="input" type="number" value="20000"></div>
+          <div><label class="small">Conversion (fraction 0–1)</label><input id="targetConv" class="input" type="number" value="0.12" min="0" max="1" step="0.001"></div>
+        </div>
+        <div class="krow">
+          <div class="kcard" style="grid-column:1/4;text-align:center;background:linear-gradient(180deg,#eef6ff,#ffffff)">
+            <div class="small">Estimated investment to reach breakeven</div>
+            <div class="ask" id="askOut" style="margin-top:10px;font-weight:900;font-size:1.8rem">$—</div>
+            <div class="small" id="askNote" style="margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="downloads">
+      <div class="pair">
+        <div class="card" style="background:linear-gradient(180deg,#ffffff,#f7fbff)">
+          <h3>Investor materials</h3>
+          <div class="grid">
+            <a class="card" href="#" download onclick="return false"><h4>Investor Pack (PDF)</h4><div class="small">Updated deck with appendix embedded.</div></a>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Get involved</h3>
+          <p class="small">Want early access when Discoveri launches? Leave your email — stored locally until we go live.</p>
+          <div class="center" style="gap:10px;flex-wrap:wrap"><input id="email" class="input" placeholder="you@example.com" style="max-width:360px"/><button class="btn brand" onclick="saveInterest()">Notify Me</button></div>
+          <div id="toast" class="small" style="margin-top:8px;color:#047857;display:none">Thanks! You’re on the list (saved locally).</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="interestModal" role="dialog" aria-modal="true" aria-label="Interest form" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45)">
+    <div class="card" style="max-width:560px;width:92vw">
+      <h3>Join the Early Access List</h3>
+      <p class="small">We’ll send you an invite when we open the gates. No spam.</p>
+      <div class="center" style="gap:10px;flex-wrap:wrap"><input id="modalEmail" class="input" placeholder="you@example.com" style="max-width:360px"/><button class="btn brand" onclick="saveInterestFromModal()">Notify Me</button></div>
+      <div class="center" style="margin-top:10px"><button class="btn" onclick="closeModal()">Close</button></div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    function $(id){ return document.getElementById(id); }
+
+    // ---------- PROMPTS ----------
+    var scenarios={
+      Focus:{text:'You have 90 minutes free tomorrow. Which choice would make the week feel meaningful, and why?',options:['Protect one deep-work block for a single priority.','Finish a lingering task you keep deferring.','Say no to a low‑leverage request and reclaim the time.']},
+      Connection:{text:'Think of someone who helped you lately. What small action would deepen the relationship?',options:['Send a short thank‑you with one specific detail.','Invite them into something you care about.','Ask a curious follow‑up about their world.']},
+      Movement:{text:'Energy check‑in: what would make tomorrow feel lighter on your body?',options:['A 12‑minute walk with music.','Stretching before bed and after waking.','A screen‑free hour in the afternoon.']},
+      Learning:{text:'Pick a micro‑skill you’ve wanted. What is the tiniest first step you can do in under 10 minutes?',options:['Watch one 5‑minute tutorial and copy one example.','Read one page and summarize in one sentence.','Ask someone one question about how they learned it.']}
+    };
+
+    function buildChoices(area){
+      var c=$('choices'); if(!c) return; c.innerHTML='';
+      var opts=scenarios[area] ? scenarios[area].options : [];
+      for(var i=0;i<opts.length;i++){
+        var opt=opts[i];
+        var label=document.createElement('label'); label.className='small';
+        var input=document.createElement('input'); input.type='radio'; input.name='choice'; input.value=opt;
+        label.appendChild(input); label.appendChild(document.createTextNode(' '+opt));
+        c.appendChild(label);
+      }
+    }
+
+    function selectArea(area){
+      var p=$('promptText'); if(p && scenarios[area]) p.textContent=scenarios[area].text;
+      buildChoices(area); window.currentAreaSel=area;
+    }
+    function randomPromptImpl(){ var keys=Object.keys(scenarios); var a=keys[Math.floor(Math.random()*keys.length)]; selectArea(a); }
+    window.randomPrompt=randomPromptImpl; selectArea('Focus');
+
+    // ---------- STREAK / AREAS / PERSONA ----------
+    var areaOrder=['Focus','Connection','Movement','Learning','Creativity','Mindfulness','Resilience','Purpose','Gratitude','Play','Finances','Sleep'];
+    var areaMeta={
+      Focus:{class:'g-focus',icon:'#i-target',tendency:'You tend to value clear focus and boundaries.'},
+      Connection:{class:'g-connection',icon:'#i-heart',tendency:'You lean into relationships and appreciation.'},
+      Movement:{class:'g-movement',icon:'#i-run',tendency:'You protect energy and quick body resets.'},
+      Learning:{class:'g-learning',icon:'#i-book',tendency:'You like tiny learning wins that stack.'},
+      Creativity:{class:'g-creativity',icon:'#i-star',tendency:'You enjoy novel approaches and playful framing.'},
+      Mindfulness:{class:'g-mindfulness',icon:'#i-mic',tendency:'You notice cues and return to the present quickly.'},
+      Resilience:{class:'g-resilience',icon:'#i-badge',tendency:'You bounce back with small, repeatable actions.'},
+      Purpose:{class:'g-purpose',icon:'#i-target',tendency:'You connect tasks to a clearer North Star.'},
+      Gratitude:{class:'g-gratitude',icon:'#i-heart',tendency:'You mark appreciation and meaning in small ways.'},
+      Play:{class:'g-play',icon:'#i-star',tendency:'You explore and tinker; curiosity drives action.'},
+      Finances:{class:'g-finances',icon:'#i-coin',tendency:'You seek simple systems for money clarity.'},
+      Sleep:{class:'g-sleep',icon:'#i-moon',tendency:'You protect restoration and wind‑down rituals.'}
+    };
+
+    var state={streak:0,timer:null,autoStarted:false};
+
+    function iconSvg(meta){ return '<svg style="width:14px;height:14px;vertical-align:-2px;margin-right:6px"><use href="'+meta.icon+'"></use></svg>'; }
+
+    function renderAreas(){
+      var wrap=$('areasWrap'); if(!wrap) return; wrap.innerHTML='';
+      for(var i=0;i<areaOrder.length;i++){
+        var name=areaOrder[i]; var threshold=31+i*30; var unlocked=state.streak>=threshold; var meta=areaMeta[name];
+        var el=document.createElement('div'); el.className='areaBadge '+(unlocked?meta.class:'locked');
+        var title=document.createElement('div'); title.className='title';
+        var icon=document.createElement('svg'); icon.style.width='18px'; icon.style.height='18px';
+        var use=document.createElement('use'); use.setAttribute('href',meta.icon); icon.appendChild(use); title.appendChild(icon);
+        title.appendChild(document.createTextNode(' '+name+(unlocked?' • unlocked':'')));
+        var desc=document.createElement('div'); desc.className='small'; desc.style.marginTop='6px';
+        desc.textContent=unlocked?meta.tendency:('Unlocks at '+threshold+' days.');
+        el.appendChild(title); el.appendChild(desc); wrap.appendChild(el);
+      }
+    }
+    renderAreas();
+
+    function updateUnderstanding(){
+      var pct=Math.round((state.streak/365)*100);
+      var u=$('understandingOut'); if(u){ u.innerHTML='<b>Overall personal understanding: </b> ~'+pct+'%'; }
+    }
+
+    function updateStreak(delta){
+      state.streak=Math.max(0,Math.min(365,state.streak+delta));
+      var sn=$('streakNum'); if(sn) sn.textContent=String(state.streak);
+      renderAreas();
+      if(state.streak>=365){ stopAuto(); }
+      renderPersona();
+      updateUnderstanding();
+    }
+
+    window.resetStreaks=function(){ stopAuto(); state.streak=0; var sn=$('streakNum'); if(sn) sn.textContent='0'; renderAreas(); renderPersona(); state.autoStarted=false; updateUnderstanding(); };
+
+    function startAuto(){ if(state.timer) return; state.timer=setInterval(function(){ updateStreak(1); },30); }
+    function stopAuto(){ if(state.timer){ clearInterval(state.timer); state.timer=null; } }
+
+    function inferAreaFromChoice(choice){
+      if(/work|task|request/i.test(choice)) return 'Focus';
+      if(/thank|invite|world/i.test(choice)) return 'Connection';
+      if(/walk|stretch|screen/i.test(choice)) return 'Movement';
+      if(/tutorial|read|question/i.test(choice)) return 'Learning';
+      return 'Focus';
+    }
+
+    function reflectNowImpl(){
+      var typed=($('userAnswer') && $('userAnswer').value || '').trim();
+      var choiceEl=document.querySelector('input[name="choice"]:checked');
+      var choice=choiceEl?choiceEl.value:'';
+      var f='';
+      if(choice){ f='Nice. Schedule it now, name a cue to start, and keep the bar for success small.'; }
+      else if(typed.length>6){ f='Good. Turn your sentence into a 10‑minute action for tomorrow. What cue will make it obvious to start?'; }
+      else { f='Pick an option or write one sentence; we will propose a concrete micro‑step.'; }
+      var fu=$('followUp'); if(fu){ fu.innerHTML='<div class="small" style="color:#0f172a">'+f+'</div>'; }
+      var a=$('analysis'), at=$('analysisText');
+      if(choice){ if(at){ at.innerHTML=iconSvg(areaMeta[inferAreaFromChoice(choice)])+'You chose "'+choice+'". That suggests a tendency toward '+inferAreaFromChoice(choice)+'. We’ll discover patterns over time and tailor prompts.'; } if(a){ a.style.display='block'; } }
+      else { if(a){ a.style.display='none'; } }
+      updateStreak(1);
+      if(!state.autoStarted){ state.autoStarted=true; startAuto(); }
+      var streaks=document.querySelector('#streaks'); if(streaks && streaks.scrollIntoView){ streaks.scrollIntoView({behavior:'smooth'}); }
+    }
+    window.reflectNow=reflectNowImpl;
+
+    function renderPersona(){
+      var out=$('personaOut'); if(!out) return;
+      if(state.streak<31){ out.textContent='Unlock areas (31 days total, then every +30) to preview insights.'; return; }
+      var overall=Math.round((state.streak/365)*100);
+      var html='';
+      for(var i=0;i<areaOrder.length;i++){
+        var name=areaOrder[i]; var threshold=31+i*30; if(state.streak>=threshold){
+          html+='<div class="small" style="margin:4px 0">'+iconSvg(areaMeta[name])+areaMeta[name].tendency+' <span style="font-weight:800;color:#0a3"></span></div>';
+        }
+      }
+      out.innerHTML=html;
+    }
+
+    // ---------- PROJECTIONS / CHARTS ----------
+    var ChartLib = window.Chart || null;
+
+    // Pricing projection
+    var projChart = ChartLib ? new ChartLib(document.getElementById('projChart'),{
+      type:'bar',
+      data:{ labels:['Net Revenue','Costs','Profit after tax'], datasets:[{ label:'USD', data:[0,0,0], barThickness:12 }] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#455a74', font:{ size:14 } } }, y:{ ticks:{ color:'#455a74', font:{ size:14 } } } } }
+    }): null;
+
+    function calcProjections(){
+      var MAU=+($('ppMAU').value||0), conv=+($('ppConv').value||0);
+      var subs=Math.round(MAU*conv);
+      var y=+($('mixY').value||0), m=+($('mixM').value||0), p=+($('mixP').value||0);
+      if(y+m+p>1){ var s=y+m+p; y/=s; m/=s; p/=s; }
+      var ySubs=Math.round(subs*y), pSubs=Math.round(subs*p), mSubs=subs - ySubs - pSubs;
+      var priceY=29.99, priceM=3.99, priceP=9.99, storeFee=.15, tax=.30;
+      var netY=priceY*(1-storeFee), netM=priceM*(1-storeFee), netP=priceP*(1-storeFee);
+      var netRevenue=(netY*ySubs/12)+(netM*mSubs)+(netP*pSubs/12);
+      var cHybrid=0.12, cPro=0.35;
+      var costs=ySubs/12*cHybrid + mSubs*cHybrid + pSubs/12*cPro;
+      var afterTax=(netRevenue - costs)*(1-tax);
+      if(projChart){ projChart.data.datasets[0].data=[+netRevenue.toFixed(2),+costs.toFixed(2),+afterTax.toFixed(2)]; projChart.update(); }
+      $('projSummary').innerHTML='Subs: <b>'+subs+'</b> → Y: <b>'+ySubs+'</b>, M: <b>'+mSubs+'</b>, P: <b>'+pSubs+'</b>';
+      $('prNet').textContent='$'+netRevenue.toFixed(2);
+      $('prCost').textContent='$'+costs.toFixed(2);
+      $('prProfit').textContent='$'+afterTax.toFixed(2);
+    }
+    ['ppMAU','ppConv','mixY','mixM','mixP'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('input',calcProjections); });
+    calcProjections();
+
+    // Unit economics
+    var unitChart = ChartLib ? new ChartLib(document.getElementById('unitChart'),{
+      type:'bar',
+      data:{ labels:['Net Revenue','Cost','Profit (pre‑tax)','Profit (after tax)'], datasets:[{ label:'USD', data:[0,0,0,0], barThickness:12 }] },
+      options:{ responsive:true, maintainAspectRatio:false, animation:false, indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ ticks:{ color:'#455a74', font:{ size:14 } } }, y:{ ticks:{ color:'#455a74', font:{ size:14 } } } } }
+    }): null;
+
+    var costModels={ mini:{in:0.60,out:2.40,memory:0.05}, hybrid:{in:0.90,out:3.00,memory:0.20}, pro:{in:5.00,out:20.00,memory:0.40} };
+    function aiCostPerUserMonth(model,type,freeDAU,paidDAU){ var days=30,p=costModels[model]; var t=type==='free'?{in:300,out:200}:{in:900,out:600}; var dau=type==='free'?freeDAU:paidDAU; var daily=t.in*p.in/1e6 + t.out*p.out/1e6 + p.memory/1e6*200; return daily*days*dau; }
+    function econScenario(){
+      var MAU=+($('inpMAU').value||0), conv=+($('inpConv').value||0), model=$('inpModel').value, price=+($('inpPrice').value||0), store=+($('inpStore').value||0.15), tax=+($('inpTax').value||0.30), freeDAU=+($('inpFreeDAU').value||0.30), paidDAU=+($('inpPaidDAU').value||0.60);
+      var paid=Math.round(MAU*conv), free=Math.max(MAU-paid,0);
+      var netARPU=price*(1-store);
+      var netRevenue=netARPU*paid;
+      var aiFree=free*aiCostPerUserMonth(model,'free',freeDAU,paidDAU);
+      var aiPaid=paid*aiCostPerUserMonth(model,'paid',freeDAU,paidDAU);
+      var infra=free*0.005 + paid*0.01;
+      var cost=aiFree+aiPaid+infra;
+      var pre=netRevenue-cost, post=pre*(1-tax);
+      if(unitChart){ unitChart.data.datasets[0].data=[+netRevenue.toFixed(2),+cost.toFixed(2),+pre.toFixed(2),+post.toFixed(2)]; unitChart.update(); }
+      $('unitSummary').innerHTML='Paid: <b>'+paid+'</b> · Free: <b>'+free+'</b> · Net ARPU: <b>$'+netARPU.toFixed(2)+'</b> · After‑tax profit: <b>$'+post.toFixed(2)+'</b>';
+      $('ueNet').textContent='$'+netRevenue.toFixed(2);
+      $('ueCost').textContent='$'+cost.toFixed(2);
+      $('ueProfit').textContent='$'+post.toFixed(2);
+    }
+    ['inpMAU','inpConv','inpModel','inpPrice','inpStore','inpTax','inpFreeDAU','inpPaidDAU'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('input',econScenario); });
+    econScenario();
+
+    // Competitors
+    var competitors=[
+      {name:'Daylio', domain:'daylio.net', play:'https://play.google.com/store/apps/details?id=net.daylio', rating:'4.7★', reviews:'500k+', users:2000000, pain:'Data deletion anxiety → Export/Delete + opt‑in cloud', conv:0.35},
+      {name:'Remente', domain:'remente.com', play:'https://play.google.com/store/apps/details?id=com.remente.app', rating:'4.6★', reviews:'100k+', users:400000, pain:'Basic features gated → Free core, premium analytics only', conv:0.35},
+      {name:'Reflectly', domain:'reflectly.app', play:'https://play.google.com/store/apps/details?id=com.reflectlyApp', rating:'4.4★', reviews:'300k+', users:1000000, pain:'Shallow AI replies → Threaded reflections + callbacks', conv:0.35},
+      {name:'Stoic', domain:'stoicroutine.com', play:'https://play.google.com/store/apps/details?id=com.stoicroutine.stoic', rating:'4.8★', reviews:'80k+', users:250000, pain:'Streak pressure → Calm mode + pause/backfill', conv:0.35}
+    ];
+    function buildCompetitors(){
+      var wrap=$('compWrap'); if(!wrap) return; wrap.innerHTML=''; var total=0; var switchRate=0.10;
+      for(var i=0;i<competitors.length;i++){
+        var c=competitors[i]; var acquired=Math.round(c.users*switchRate*c.conv); total+=acquired;
+        var card=document.createElement('div'); card.className='c';
+        card.innerHTML='<div style="display:flex;align-items:center;gap:12px">'
+          +'<img class="app-img" src="https://www.google.com/s2/favicons?sz=128&domain='+c.domain+'" alt="'+c.name+'"/>'
+          +'<div><b>'+c.name+'</b><br><a href="'+c.play+'" target="_blank" rel="noreferrer">Open on Play</a></div></div>'
+          +'<div class="small" style="margin-top:10px"><b>Users (approx MAU):</b> '+c.users.toLocaleString()+' · <b>Rating:</b> '+c.rating+' · <b>Reviews:</b> '+c.reviews
+          +'<br><b>Pain → Solution:</b> '+c.pain
+          +'<br><b>Est. users gained:</b> <span style="font-weight:900">'+acquired.toLocaleString()+'</span> <span class="small">(assume 10% switch × our '+Math.round(c.conv*100)+'% conversion)</span></div>';
+        wrap.appendChild(card);
+      }
+      var totalEl=$('compTotal'); if(totalEl) totalEl.textContent=total.toLocaleString();
+    }
+    buildCompetitors();
+
+    // Timeline
+    var months=['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'];
+    var feats=['Foundations, closed beta, core prompt engine','Streak counter + privacy center','Threaded reflections + values clustering','Trimester reports + Yearly plan','Creator packs + weekly themes','Public launch + shorts funnel','Pro tier + longer threads','Search & cross‑entry insights','Teams/teachers pilot','International EN markets push','Seasonal campaigns + review recap','Year‑end summary + renewal drive'];
+    function buildTimeline(){
+      var wrap=$('timelineWrap'); if(!wrap) return; wrap.innerHTML=''; var store=.15, tax=.30; var price={y:29.99,m:3.99,p:9.99}; var mix={y:.6,m:.35,p:.05}; var conv=.12; var targetMAU=10000;
+      for(var i=0;i<months.length;i++){
+        var side=i%2===0?'left':'right'; var mau=Math.round(targetMAU*((i+1)/months.length));
+        var subs=Math.round(mau*conv); var y=Math.round(subs*mix.y), p=Math.round(subs*mix.p), mon=subs-y-p;
+        var net=(price.y*(1-store)*y/12)+(price.m*(1-store)*mon)+(price.p*(1-store)*p/12);
+        var costs=y/12*0.12 + mon*0.12 + p/12*0.35;
+        var post=(net-costs)*(1-tax);
+        var ev=document.createElement('div'); ev.className='event '+side;
+        ev.innerHTML='<div class="dot"></div><div class="card"><b>'+months[i]+'</b> — '+feats[i]+'<br><span class="small">MAU: <b>'+mau.toLocaleString()+'</b> · After‑tax and store net revenue: <b>$'+post.toFixed(0)+'</b></span></div>';
+        wrap.appendChild(ev);
+      }
+    }
+    buildTimeline();
+
+    // Funding ask
+    function calcAsk(){
+      var burn=+($('burn').value||0), mkt=+($('mkt').value||0), monthsN=+($('months').value||6), target=+($('targetMAU').value||20000), conv=+($('targetConv').value||0.12);
+      var mix={y:0.6,m:0.35,p:0.05}; var price={y:29.99,m:3.99,p:9.99}; var store=0.15; var cHybrid=0.12, cPro=0.35; var cashNeed=0;
+      for(var i=1;i<=monthsN;i++){
+        var mau_i=target*(i/monthsN); var subs=Math.round(mau_i*conv); var y=Math.round(subs*mix.y), p=Math.round(subs*mix.p), mth=subs-y-p;
+        var netRevenue=(price.y*(1-store)*y/12)+(price.m*(1-store)*mth)+(price.p*(1-store)*p/12);
+        var costs=y/12*cHybrid + mth*cHybrid + p/12*cPro + burn + mkt; var profit=netRevenue - costs; if(profit<0) cashNeed += -profit;
+      }
+      var buffer=cashNeed*0.2; var ask=Math.ceil((cashNeed+buffer)/1000)*1000; $('askOut').textContent='$'+ask.toLocaleString(); $('askNote').innerHTML='Estimated cash to reach breakeven in <b>'+monthsN+'</b> months (includes 20% buffer).';
+    }
+    ['burn','mkt','months','targetMAU','targetConv'].forEach(function(id){ var el=$(id); if(el) el.addEventListener('input',calcAsk); });
+    calcAsk();
+
+    // Minimal safe stubs for modal/notify
+    window.openModal=window.openModal||function(){ var m=$('interestModal'); if(m) m.style.display='flex'; };
+    window.closeModal=window.closeModal||function(){ var m=$('interestModal'); if(m) m.style.display='none'; };
+    window.saveInterest=window.saveInterest||function(){ var e=$('email'); if(!e) return; var v=e.value.trim(); if(!v) return; var list=JSON.parse(localStorage.getItem('interestList')||'[]'); if(list.indexOf(v)===-1) list.push(v); localStorage.setItem('interestList',JSON.stringify(list)); var t=$('toast'); if(t){ t.style.display='block'; setTimeout(function(){ t.style.display='none'; },3000);} };
+    window.saveInterestFromModal=window.saveInterestFromModal||function(){ var e=$('modalEmail'); if(!e) return; var v=e.value.trim(); if(!v) return; var list=JSON.parse(localStorage.getItem('interestList')||'[]'); if(list.indexOf(v)===-1) list.push(v); localStorage.setItem('interestList',JSON.stringify(list)); var m=$('interestModal'); if(m) m.style.display='none'; alert('Thanks! Saved locally.'); };
+  })();
+  </script>
+</body>
+</html>
